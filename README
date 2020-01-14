@@ -1,0 +1,18 @@
+Note:
+=====
+
+0. Please Create keys.yml and add below keys once you created in aws .
+   Example: keys.yml 
+
+   AWS_ACCESS_KEY_ID: ##
+   AWS_SECRET_ACCESS_KEY: ###
+
+1. Create .pass file and add same password as you provided while encrypting keys.yml. Please make sure that .pass file should plain text.
+
+2. You dont need create aws.pem file, therefore, it will created automatically as we have mentioned in the playbook.
+
+3. These all files are invisible keys.yml .pem and .pass files. However, I excluded them. All files should at same locotion.
+
+4. Please make sure that all variables should in place as per your requirement like AMI-ID instance-type count & ansible_user/remote_user.
+
+5. Now run main script ./launch_ec2_Create_user_main.sh

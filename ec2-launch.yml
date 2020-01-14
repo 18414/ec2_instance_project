@@ -1,0 +1,97 @@
+---
+- name: Launch ec2 instance
+  hosts: localhost
+  become: true
+  debugger: on_failed
+  vars_files: 
+    - keys.yml
+  tasks: 
+    - name: Create keypair
+      ec2_key: 
+        aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+        aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+        ec2_region: "{{ AWS_REGION }}"
+        name: pkey
+        state: present
+      register: ec2keyvar
+
+    - debug: msg={{ ec2keyvar }}
+
+    - name: Save private key
+      lineinfile:  
+        create: yes
+        path: aws.pem 
+        line: "{{ ec2keyvar.key.private_key }}"
+        mode: 0600
+        owner: ansible
+        group: ansible
+      when: ec2keyvar.changed
+
+ 
+    - name: Launch EC2 instance
+      ec2: 
+        aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+        aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+        ec2_region: "{{ AWS_REGION }}"
+        key_name: pkey
+        image: ami-0015b9ef68c77328d #centos7
+        assign_public_ip: yes
+        wait: yes
+        count: 1
+        instance_type: t2.micro
+        vpc_subnet_id: subnet-0bae8625
+        group: ASGSG
+      register: ec2
+
+    - debug: msg={{ ec2.instances }}
+
+      
+    - name: Tag ec2 instance
+      ec2_tag:
+        aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+        aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+        ec2_region: "{{ AWS_REGION }}"
+        resource: "{{ item.id }}" 
+        state: present
+        tags:
+          Name: Master
+          env: kube
+      with_items: "{{ ec2.instances }}"
+
+    - name: Append group name into the inventory
+      lineinfile:
+       path: /etc/ansible/hosts #home/ansible/spinup-ec2instance/inventory/hosts
+       line: "[cluster]"
+
+
+    - name: Add host into the inventory
+      lineinfile:
+        path: /etc/ansible/hosts #/home/ansible/spinup-ec2instance/inventory/hosts
+        insertafter: "[cluster]"
+        line: '{{ item.public_ip }}'
+      with_items: "{{ ec2.instances }}"
+
+    - name: Add host group vars into the inventory
+      lineinfile:
+        path: /etc/ansible/hosts #home/ansible/spinup-ec2instance/inventory/hosts
+        line: '[cluster:vars]'
+    - name: Add pem key file into the inventory
+      lineinfile:
+        path: /etc/ansible/hosts #/home/ansible/spinup-ec2instance/inventory/hosts
+        insertafter: '[cluster:vars]'
+        line: ansible_ssh_private_key_file=/home/ansible/aws.pem
+
+    - name: Add pem key file into the inventory
+      lineinfile:
+        path: /etc/ansible/hosts #/home/ansible/spinup-ec2instance/inventory/hosts
+        insertafter: '[cluster:vars]'
+        line: ansible_user=centos
+
+    - name: Wait for SSH to come up 
+      local_action: wait_for
+                    host={{ item.public_ip }}
+                    port=22
+                    state=started
+      with_items: "{{ ec2.instances }}"
+
+

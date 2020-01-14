@@ -1,0 +1,25 @@
+- name: Create user on newly server
+  hosts: cluster
+#remote_user: ec2-user
+  become: yes
+  tasks:
+    - name: Create an user
+      user:
+        name: ansible
+        state: present
+        generate_ssh_key: yes
+      register: nuser
+
+    - name: Give sudo access to user
+      lineinfile:
+        path: /etc/sudoers
+        regexp: "^root"
+        line: "ansible ALL=(ALL) NOPASSWD: ALL"
+
+    - name: Send key to the remote server
+      authorized_key:
+        user: ansible
+        manage_dir: true
+        key: "{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub') }}"
+        state: present
+
