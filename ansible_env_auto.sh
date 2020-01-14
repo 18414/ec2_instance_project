@@ -52,11 +52,8 @@ pip install awscli==1.15.83
   su - ansible << EOF
   git config --global user.name "Bhushan Mahajan"
   git config --global user.email "bmahajan0@gmail.com"
-  git clone https://github.com/18414/ansible.git
-  git clone https://github.com/18414/devops-tools-menu-driven.git
   echo "cd /home/ansible/ansible/playbooks" >> ~/.bashrc
   cd /home/ansible/ansible
-  git pull https://github.com/18414/ansible.git
 EOF
 
 
