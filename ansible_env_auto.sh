@@ -17,6 +17,18 @@ echo "ansible" | passwd --stdin ansible
  sed -i "/^root/a \\ansible ALL=(ALL) NOPASSWD: ALL" /etc/sudoers > /dev/null
 
 
+##################################################################################
+#Create SSH key and auto on root
+    echo -e "\n"|ssh-keygen -t rsa -N ""    
+    cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/authorized_keys
+
+
+#################################################################################
+#Sync date & time 
+ntpdate us.pool.ntp.org
+
+yum -y install ntp*
 
 ###################################################################################
 # SSH create_key
