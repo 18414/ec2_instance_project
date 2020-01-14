@@ -14,9 +14,9 @@
   else
 
     echo -e "`tput setaf 1`Ansible does not present. Do you want to install Ansible[y/n]`tput sgr0`"
-    read -p "Enter val" val
+    read -p "Enter val: " val
        
-     if [i $val -eq "y" ];then
+     if [ $val -eq "y" ];then
 
  echo -e -n "`tput setaf 2``tput bold`\n Ansible is intalling & Fasten your seatbelt please! `tput sgr0`";sleep 2;echo -n ..;sleep 1;echo -n ...;echo " ";echo " "
          ./ansible_env_auto.sh
