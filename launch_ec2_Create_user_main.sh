@@ -16,7 +16,7 @@
     echo -e "`tput setaf 1`Ansible does not present. Do you want to install Ansible[y/n]`tput sgr0`"
     read -p "Enter val: " val
        
-     if [ $val -eq "y" ];then
+     if [ $val == "y" ];then
 
  echo -e -n "`tput setaf 2``tput bold`\n Ansible is intalling & Fasten your seatbelt please! `tput sgr0`";sleep 2;echo -n ..;sleep 1;echo -n ...;echo " ";echo " "
          ./ansible_env_auto.sh
@@ -36,8 +36,10 @@ read -p "Enter Input: " vale
 case $vale in 
 
 y) echo -e -n "`tput setaf 2``tput bold`\nLaunching ec2 instance Fasten your seatbelt please `tput sgr0`";sleep 2;echo -n ..;sleep 1;echo -n ...;echo " ";echo " "
-   ansible-playbook ec2-launch.yml --vault-password-file .pass 
-   ansible-playbook create_user_ssh_key.yml --vault-password-file .pass 
+   #ansible-playbook ec2-launch.yml --vault-password-file .pass 
+   #ansible-playbook create_user_ssh_key.yml --vault-password-file .pass 
+   ansible-playbook ec2-launch.yml 
+   ansible-playbook create_user_ssh_key.yml 
    ;;
 
 e) exit

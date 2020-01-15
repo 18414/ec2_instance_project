@@ -4,21 +4,23 @@
 # Author : Bhushan Mahajan
 # Date:- 09-JAN-2018
 # Updated date: 05-May-2019
-
+############################################
 
 #Addin user
-useradd ansible 
-echo "ansible" | passwd --stdin ansible
+cat /etc/passwd | grep ansible
+  if [ $? -ne 0 ]; then
+    useradd ansible && echo "ansible" | passwd --stdin ansible
+  fi
  
 ##################################################################################
 
 ## Granting sudo access
 ## NOTE: Put double backslash before the variable and escapae the string in SED 
- sed -i "/^root/a \\ansible ALL=(ALL) NOPASSWD: ALL" /etc/sudoers > /dev/null
+sed -i "/^root/a \\ansible ALL=(ALL) NOPASSWD: ALL" /etc/sudoers > /dev/null
 
 
 ##################################################################################
-#Create SSH key and auto on root
+#Create SSH key for root 
     echo -e "\n"|ssh-keygen -t rsa -N ""    
     cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
     chmod 600 ~/.ssh/authorized_keys
@@ -26,12 +28,22 @@ echo "ansible" | passwd --stdin ansible
 
 #################################################################################
 #Sync date & time 
-ntpdate us.pool.ntp.org
 
-yum -y install ntp*
+rpm -qa | grep ntp* > /dev/null
+  if [ $? -ne 0 ]; then
+
+     echo -e "\n\t\033[33;5mNTP is installing..\033[0m\n"
+     yum -y install ntp*
+     ntpdate us.pool.ntp.org
+
+  else
+
+     ntpdate us.pool.ntp.org
+  
+  fi
 
 ###################################################################################
-# SSH create_key
+# Creating SSH KEY for Ansible user 
     su - ansible  << EOF
     echo -e "\n"|ssh-keygen -t rsa -N ""    
     cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
@@ -67,8 +79,6 @@ pip install awscli==1.15.83
   echo "cd /home/ansible/ansible/playbooks" >> ~/.bashrc
   cd /home/ansible/ansible
 EOF
-
-
 
 
 
